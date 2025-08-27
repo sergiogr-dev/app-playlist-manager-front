@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } fr
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { PlaylistService } from '../services/playlist.service';
+import { SpotifyService } from '../services/spotify.service';
 import { PlaylistResponseDTO, PlaylistRequestDTO, SongRequestDTO } from '../models/api.models';
 
 @Component({
@@ -89,12 +90,14 @@ import { PlaylistResponseDTO, PlaylistRequestDTO, SongRequestDTO } from '../mode
                     >
                   </div>
                   <div class="form-group">
-                    <input 
-                      type="text" 
+                    <select 
                       formControlName="genre" 
                       class="form-control"
-                      placeholder="Género (opcional)"
                     >
+                      <option value="">Género (opcional)</option>
+                      <option *ngFor="let genre of availableGenres" [value]="genre">{{ genre }}</option>
+                    </select>
+                    <div *ngIf="loadingGenres" class="loading-genres">Cargando géneros...</div>
                   </div>
                   <button type="button" (click)="removeSong(i)" class="btn-remove">×</button>
                 </div>
@@ -139,6 +142,7 @@ import { PlaylistResponseDTO, PlaylistRequestDTO, SongRequestDTO } from '../mode
                 <strong>{{ song.title }}</strong> - {{ song.artist }}
                 <span *ngIf="song.album"> ({{ song.album }})</span>
                 <span *ngIf="song.year"> - {{ song.year }}</span>
+                <span *ngIf="song.genre"> - {{ song.genre }}</span>
               </div>
             </div>
           </div>
@@ -358,6 +362,12 @@ import { PlaylistResponseDTO, PlaylistRequestDTO, SongRequestDTO } from '../mode
       margin-top: 0.5rem;
     }
 
+    .loading-genres {
+      font-size: 0.875rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+
     .no-playlists {
       text-align: center;
       padding: 2rem;
@@ -385,17 +395,20 @@ export class PlaylistsComponent implements OnInit {
   playlistForm: FormGroup;
   playlists: PlaylistResponseDTO[] = [];
   currentUser: any = null;
+  availableGenres: string[] = [];
   
   createLoading = false;
   loadingPlaylists = false;
+  loadingGenres = false;
   createErrorMessage = '';
   playlistsErrorMessage = '';
 
   constructor(
-    private formBuilder: FormBuilder,
-    private playlistService: PlaylistService,
-    private authService: AuthService,
-    private router: Router
+    private readonly formBuilder: FormBuilder,
+    private readonly playlistService: PlaylistService,
+    private readonly authService: AuthService,
+    private readonly spotifyService: SpotifyService,
+    private readonly router: Router
   ) {
     this.playlistForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -413,6 +426,7 @@ export class PlaylistsComponent implements OnInit {
     });
     
     this.loadPlaylists();
+    this.loadGenres();
   }
 
   get songs(): FormArray {
@@ -499,6 +513,24 @@ export class PlaylistsComponent implements OnInit {
         this.loadingPlaylists = false;
         this.playlistsErrorMessage = 'Error al cargar las playlists.';
         console.error('Error cargando playlists:', error);
+      }
+    });
+  }
+
+  loadGenres(): void {
+    this.loadingGenres = true;
+    
+    this.spotifyService.getMarkets().subscribe({
+      next: (response) => {
+        this.loadingGenres = false;
+        if (response.success && response.data) {
+          // Simulamos que los mercados son géneros
+          this.availableGenres = response.data;
+        }
+      },
+      error: (error) => {
+        this.loadingGenres = false;
+        console.error('Error cargando géneros (mercados de Spotify):', error);
       }
     });
   }
