@@ -172,7 +172,7 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
+    if (this.loginForm.valid && !this.loading) {
       this.loading = true;
       this.errorMessage = '';
 
@@ -180,8 +180,15 @@ export class LoginComponent {
 
       this.authService.login(credentials).subscribe({
         next: (response) => {
-          this.loading = false;
-          this.router.navigate(['/playlists']);
+          if (response.accessToken) {
+            setTimeout(() => {
+              this.loading = false;
+              this.router.navigate(['/playlists']);
+            }, 100);
+          } else {
+            this.loading = false;
+            this.errorMessage = 'Error en la respuesta del servidor.';
+          }
         },
         error: (error) => {
           this.loading = false;
@@ -191,6 +198,7 @@ export class LoginComponent {
       });
     }
   }
+
 
   goToRegister(): void {
     this.router.navigate(['/register']);
