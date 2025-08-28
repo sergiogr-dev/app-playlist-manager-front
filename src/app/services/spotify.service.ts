@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { StandardizeApiResponse } from '../models/api.models';
+import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SpotifyService {
-  private apiUrl = 'http://localhost:8080/api/v1/spotify';
+  private apiUrl = `${environment.apiUrl}/api/v1/spotify`;
 
   constructor(
     private http: HttpClient,

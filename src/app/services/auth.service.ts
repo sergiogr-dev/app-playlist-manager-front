@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../environments/environment';
 import { 
   AuthenticationRequest, 
   RegisterRequest, 
@@ -15,7 +16,7 @@ import {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/v1/auth';
+  private apiUrl = `${environment.apiUrl}/api/v1/auth`;
   private currentUserSubject = new BehaviorSubject<TokenValidationResponse | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 

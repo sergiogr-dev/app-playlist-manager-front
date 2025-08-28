@@ -4,7 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:docker": "ng serve --configuration=docker",
     "build": "ng build",
+    "build:dev": "ng build --configuration=development",
+    "build:docker": "ng build --configuration=docker",
+    "build:prod": "ng build --configuration=production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:app-playlist-manager-front": "node dist/app-playlist-manager-front/server/server.mjs"
